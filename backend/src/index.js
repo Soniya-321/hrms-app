@@ -32,7 +32,7 @@ app.get('/api/health', (req, res) => {
 app.use(errorHandler);
 
 // Start server
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 const DB_NAME = process.env.DB_NAME;
 
 const startServer = async () => {
@@ -43,7 +43,7 @@ const startServer = async () => {
     console.log("Database connected", DB_NAME);
 
     // Start server
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server running on port ${PORT}`);
     });
   } catch (error) {
