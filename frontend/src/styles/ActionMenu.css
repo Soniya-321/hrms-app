@@ -1,0 +1,84 @@
+.action-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.action-menu-button {
+  padding: 8px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-menu-button:hover {
+  background-color: #f3f4f6;
+}
+
+.action-menu-icon {
+  width: 20px;
+  height: 20px;
+  color: #6b7280;
+}
+
+.action-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  width: 150px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e5e7eb;
+  z-index: 50;
+  overflow: hidden;
+}
+
+.action-menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  font-size: 14px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  text-align: left;
+}
+
+.action-menu-edit {
+  color: #374151;
+}
+
+.action-menu-edit:hover {
+  background-color: #f9fafb;
+}
+
+.action-menu-delete {
+  color: #dc2626;
+}
+
+.action-menu-delete:hover {
+  background-color: #fef2f2;
+}
+
+.action-menu-item-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+}
+
+.action-menu-edit .action-menu-item-icon {
+  color: #6b7280;
+}
+
+.action-menu-divider {
+  border-top: 1px solid #f3f4f6;
+  margin: 0;
+}
