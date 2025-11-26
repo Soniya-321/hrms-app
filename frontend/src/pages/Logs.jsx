@@ -89,100 +89,102 @@ const Logs = () => {
           <h1 className="logs-title">Log Entries</h1>
         </div>
 
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-
         {error && (
           <div className="error-message">
             {error}
           </div>
         )}
 
-        {!loading && !error && (
-          <div className="table-container">
-            <div className="table-wrapper">
-              <table className="logs-table">
-                <thead>
+        <div className="table-container">
+          <div className="table-wrapper">
+            <table className="logs-table">
+              <thead>
+                <tr>
+                  <th className="table-header">
+                    <div className="header-content">
+                      <Clock className="header-icon" />
+                      Date & Time
+                    </div>
+                  </th>
+                  <th className="table-header">
+                    <div className="header-content">
+                      <User className="header-icon" />
+                      User
+                    </div>
+                  </th>
+                  <th className="table-header">
+                    <div className="header-content">
+                      <Activity className="header-icon" />
+                      Action
+                    </div>
+                  </th>
+                  <th className="table-header">
+                    <div className="header-content">
+                      <FileText className="header-icon" />
+                      Details
+                    </div>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* --- Conditional Rendering inside the tbody --- */}
+                {loading ? (
                   <tr>
-                    <th className="table-header">
-                      <div className="header-content">
-                        <Clock className="header-icon" />
-                        Date & Time
+                    <td colSpan="4" className="loading-state">
+                      <div className="loading-container">
+                        <div className="loading-spinner"></div>
                       </div>
-                    </th>
-                    <th className="table-header">
-                      <div className="header-content">
-                        <User className="header-icon" />
-                        User
-                      </div>
-                    </th>
-                    <th className="table-header">
-                      <div className="header-content">
-                        <Activity className="header-icon" />
-                        Action
-                      </div>
-                    </th>
-                    <th className="table-header">
-                      <div className="header-content">
-                        <FileText className="header-icon" />
-                        Details
-                      </div>
-                    </th>
+                    </td>
                   </tr>
-                </thead>
-                <tbody>
-                  {currentLogs.length === 0 ? (
-                    <tr>
-                      <td colSpan="4" className="empty-state">
-                        <div className="empty-state-content">
-                          <div className="empty-state-icon">
-                            <FileText className="empty-icon" />
+                ) : currentLogs.length === 0 ? (
+                  <tr>
+                    <td colSpan="4" className="empty-state">
+                      <div className="empty-state-content">
+                        <div className="empty-state-icon">
+                          <FileText className="empty-icon" />
+                        </div>
+                        <p className="empty-state-text">No activity logs found.</p>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  currentLogs.map((log) => (
+                    <tr key={log.id} className="table-row">
+                      <td className="table-cell">
+                        <div className="cell-text cell-datetime">
+                          {formatDate(log.timestamp)}
+                        </div>
+                      </td>
+                      <td className="table-cell">
+                        <div className="user-cell">
+                          <div className="user-avatar-small">
+                            <User className="user-icon-small" />
                           </div>
-                          <p className="empty-state-text">No activity logs found.</p>
+                          <span className="cell-text">
+                            {log.user ? log.user.name : 'Unknown'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="table-cell">
+                        <span className={getActionBadgeClass(log.action)}>
+                          {log.action.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="table-cell">
+                        <div className="cell-text cell-details">
+                          {getActionDescription(log.action, log.meta)}
                         </div>
                       </td>
                     </tr>
-                  ) : (
-                    currentLogs.map((log) => (
-                      <tr key={log.id} className="table-row">
-                        <td className="table-cell">
-                          <div className="cell-text cell-datetime">
-                            {formatDate(log.timestamp)}
-                          </div>
-                        </td>
-                        <td className="table-cell">
-                          <div className="user-cell">
-                            <div className="user-avatar-small">
-                              <User className="user-icon-small" />
-                            </div>
-                            <span className="cell-text">
-                              {log.user ? log.user.name : 'Unknown'}
-                            </span>
-                          </div>
-                        </td>
-                        <td className="table-cell">
-                          <span className={getActionBadgeClass(log.action)}>
-                            {log.action.replace(/_/g, ' ')}
-                          </span>
-                        </td>
-                        <td className="table-cell">
-                          <div className="cell-text cell-details">
-                            {getActionDescription(log.action, log.meta)}
-                          </div>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  ))
+                )}
+                {/* --- End Conditional Rendering --- */}
+              </tbody>
+            </table>
           </div>
-        )}
+        </div>
 
-        {logs.length > 0 && (
+        {logs.length > 0 && !loading && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

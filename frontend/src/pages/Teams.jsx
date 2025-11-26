@@ -4,7 +4,7 @@ import TeamForm from '../components/TeamForm';
 import ActionMenu from '../components/ActionMenu';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
-import { Plus, UsersRound  } from 'lucide-react';
+import { Plus, UsersRound } from 'lucide-react';
 import '../styles/Team.css';
 
 const Teams = () => {
@@ -117,12 +117,7 @@ const Teams = () => {
             />
         )}
 
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-
+        {/* Error message display remains here */}
         {error && (
           <div className="error-message">
             {error}
@@ -141,12 +136,21 @@ const Teams = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentTeams.length === 0 && !loading ? (
+                {/* --- Conditional Rendering inside the tbody --- */}
+                {loading ? (
+                  <tr>
+                    <td colSpan="4" className="loading-state">
+                      <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentTeams.length === 0 ? (
                   <tr>
                     <td colSpan="4" className="empty-state">
                       <div className="empty-state-content">
                         <div className="empty-state-icon">
-                          <UsersRound  className="empty-icon" />
+                          <UsersRound className="empty-icon" />
                         </div>
                         <p className="empty-state-text">No teams found. Add your first team!</p>
                       </div>
@@ -186,12 +190,14 @@ const Teams = () => {
                     </tr>
                   ))
                 )}
+                {/* --- End Conditional Rendering --- */}
               </tbody>
             </table>
           </div>
         </div>
 
-        {teams.length > 0 && (
+        {/* Pagination only shows if there are items */}
+        {teams.length > 0 && !loading && (
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}

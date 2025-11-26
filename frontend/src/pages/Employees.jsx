@@ -4,7 +4,7 @@ import EmployeeForm from '../components/EmployeeForm';
 import ActionMenu from '../components/ActionMenu';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
-import { Plus, Users   } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import '../styles/Employees.css';
 
 const Employees = () => {
@@ -17,6 +17,8 @@ const Employees = () => {
   const [deletingEmployee, setDeletingEmployee] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+
+  console.log("loading state:", loading);
 
   useEffect(() => {
     fetchEmployees();
@@ -88,7 +90,6 @@ const Employees = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
-  console.log("Pages", totalPages, employees.length);
 
   return (
     <div className="employees-page">
@@ -119,12 +120,6 @@ const Employees = () => {
             />
         )}
 
-        {loading && (
-          <div className="loading-container">
-            <div className="loading-spinner"></div>
-          </div>
-        )}
-
         {error && (
           <div className="error-message">
             {error}
@@ -144,12 +139,21 @@ const Employees = () => {
                 </tr>
               </thead>
               <tbody>
-                {currentEmployees.length === 0 && !loading ? (
+                {/* --- Conditional Rendering inside the tbody --- */}
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="loading-state">
+                      <div className="loading-container">
+                        <div className="loading-spinner"></div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : currentEmployees.length === 0 ? (
                   <tr>
                     <td colSpan="5" className="empty-state">
                       <div className="empty-state-content">
                         <div className="empty-state-icon">
-                          <Users    className="empty-icon" />
+                          <Users className="empty-icon" />
                         </div>
                         <p className="empty-state-text">No employees found. Add your first employee!</p>
                       </div>
@@ -194,12 +198,13 @@ const Employees = () => {
                     </tr>
                   ))
                 )}
+                {/* --- End Conditional Rendering --- */}
               </tbody>
             </table>
           </div>
         </div>
         
-        {employees.length >= 1 && (
+        {employees.length >= 1 && !loading && (
             <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
