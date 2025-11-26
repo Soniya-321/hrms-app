@@ -44,6 +44,7 @@ app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
+
 // Use 0.0.0.0 for compatibility with containerized environments like Render
 const HOST = process.env.NODE_ENV === 'production' ? '0.0.0.0' : 'localhost';
 
