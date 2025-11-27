@@ -4,7 +4,7 @@ import EmployeeForm from '../components/EmployeeForm';
 import ActionMenu from '../components/ActionMenu';
 import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
 import Pagination from '../components/Pagination';
-import { Plus, Users } from 'lucide-react';
+import { Plus, Users, AlertTriangle } from 'lucide-react'; // Added AlertTriangle icon
 import '../styles/Employees.css';
 
 const Employees = () => {
@@ -18,8 +18,6 @@ const Employees = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  console.log("loading state:", loading);
-
   useEffect(() => {
     fetchEmployees();
     fetchTeams();
@@ -27,6 +25,7 @@ const Employees = () => {
 
   const fetchEmployees = async () => {
     setLoading(true);
+    setError(''); // Clear previous errors
     try {
       const response = await employeeAPI.getAll();
       setEmployees(response.data);
@@ -91,6 +90,90 @@ const Employees = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentEmployees = employees.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Determine the content to display inside the table body
+  const renderTableBodyContent = () => {
+    if (loading) {
+      return (
+        <tr>
+          <td colSpan="5" className="loading-state">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (error) {
+        return (
+            <tr>
+              <td colSpan="5" className="error-state">
+                <div className="empty-state-content">
+                    <div className="empty-state-icon error-icon-wrapper">
+                        <AlertTriangle className="empty-icon" />
+                    </div>
+                    <p className="empty-state-text">{error}</p>
+                    <button onClick={fetchEmployees} className="retry-button">Try Again</button>
+                </div>
+              </td>
+            </tr>
+          );
+    }
+
+    if (currentEmployees.length === 0) {
+      return (
+        <tr>
+          <td colSpan="5" className="empty-state">
+            <div className="empty-state-content">
+              <div className="empty-state-icon">
+                <Users className="empty-icon" />
+              </div>
+              <p className="empty-state-text">No employees found. Add your first employee!</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    return currentEmployees.map((employee) => (
+      <tr key={employee.id} className="table-row">
+        <td className="table-cell">
+          <div className="employee-name">
+            {employee.first_name} {employee.last_name}
+          </div>
+        </td>
+        <td className="table-cell">
+          <div className="cell-text">{employee.email}</div>
+        </td>
+        <td className="table-cell">
+          <div className="cell-text">{employee.phone}</div>
+        </td>
+        <td className="table-cell">
+          <div className="teams-container">
+            {employee.teams && employee.teams.length > 0 ? (
+              employee.teams.map((team) => (
+                <span key={team.id} className="team-badge">
+                  {team.name}
+                </span>
+              ))
+            ) : (
+              <span className="no-teams">No teams assigned</span>
+            )}
+          </div>
+        </td>
+        <td className="table-cell table-cell-actions">
+          <div className="actions-wrapper">
+            <ActionMenu
+              employee={employee}
+              onEdit={handleEditEmployee}
+              onDelete={handleDeleteClick}
+            />
+          </div>
+        </td>
+      </tr>
+    ));
+  };
+
   return (
     <div className="employees-page">
       <div className="employees-container">
@@ -120,12 +203,8 @@ const Employees = () => {
             />
         )}
 
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-
+        {/* Removed the top-level error display as it is now in the table body */}
+        
         <div className="table-container">
           <div className="table-wrapper">
             <table className="employees-table">
@@ -139,72 +218,14 @@ const Employees = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* --- Conditional Rendering inside the tbody --- */}
-                {loading ? (
-                  <tr>
-                    <td colSpan="5" className="loading-state">
-                      <div className="loading-container">
-                        <div className="loading-spinner"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : currentEmployees.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" className="empty-state">
-                      <div className="empty-state-content">
-                        <div className="empty-state-icon">
-                          <Users className="empty-icon" />
-                        </div>
-                        <p className="empty-state-text">No employees found. Add your first employee!</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  currentEmployees.map((employee) => (
-                    <tr key={employee.id} className="table-row">
-                      <td className="table-cell">
-                        <div className="employee-name">
-                          {employee.first_name} {employee.last_name}
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="cell-text">{employee.email}</div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="cell-text">{employee.phone}</div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="teams-container">
-                          {employee.teams && employee.teams.length > 0 ? (
-                            employee.teams.map((team) => (
-                              <span key={team.id} className="team-badge">
-                                {team.name}
-                              </span>
-                            ))
-                          ) : (
-                            <span className="no-teams">No teams assigned</span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="table-cell table-cell-actions">
-                        <div className="actions-wrapper">
-                          <ActionMenu
-                            employee={employee}
-                            onEdit={handleEditEmployee}
-                            onDelete={handleDeleteClick}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-                {/* --- End Conditional Rendering --- */}
+                {renderTableBodyContent()}
               </tbody>
             </table>
           </div>
         </div>
         
-        {employees.length >= 1 && !loading && (
+        {/* Pagination only shows if there are items and not loading/errored */}
+        {employees.length > 0 && !loading && !error && (
             <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

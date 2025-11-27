@@ -40,6 +40,8 @@ export const authAPI = {
   
   login: (email, password) =>
     api.post('/auth/login', { email, password }),
+
+  logout: () => api.post('/auth/logout'),
 };
 
 // Employee API

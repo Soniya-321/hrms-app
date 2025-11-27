@@ -107,4 +107,27 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login };
+// Logout user
+const logout = async (req, res) => {
+    try {
+      // Assumes 'authMiddleware' is used on this route to populate req.user
+      const { userId, organisationId } = req.user;
+      console.log("logged out user", userId, organisationId);
+  
+      // Log action
+      await Log.create({
+        organisation_id: organisationId,
+        user_id: userId,
+        action: 'user_logged_out',
+        meta: { userId: userId },
+      });
+  
+      res.json({ message: 'Logout successful' });
+  
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: 'Server error during logout' });
+    }
+};
+
+module.exports = { register, login, logout };

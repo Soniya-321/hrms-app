@@ -34,7 +34,7 @@
   justify-content: center;
 }
 
-/* .loading-spinner {
+.loading-spinner {
   width: 48px;
   height: 48px;
   border: 4px solid #e5e7eb;
@@ -47,7 +47,32 @@
   to {
     transform: rotate(360deg);
   }
-} */
+}
+
+.error-state {
+    text-align: center;
+    padding: 40px 0;
+    color: #d9534f; /* A standard error color */
+}
+
+.error-icon-wrapper {
+    color: #d9534f;
+}
+
+.retry-button {
+    margin-top: 15px;
+    padding: 10px 20px;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.retry-button:hover {
+    background-color: #c9302c;
+}
 
 .error-message {
   background-color: #fef2f2;

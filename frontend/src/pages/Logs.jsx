@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { logAPI } from '../services/api';
 import Pagination from '../components/Pagination';
-import { Clock, User, Activity, FileText } from 'lucide-react';
+import { Clock, User, Activity, FileText, AlertTriangle } from 'lucide-react';
 import '../styles/Logs.css';
 
 const Logs = () => {
@@ -16,13 +16,16 @@ const Logs = () => {
   }, []);
 
   const fetchLogs = async () => {
+    setLoading(true); // Ensure loading is true when fetching starts
+    setError(''); // Clear previous errors
     try {
       const response = await logAPI.getAll();
+      console.log("Logs", response.data);
       setLogs(response.data);
-      setLoading(false);
     } catch (err) {
       setError('Failed to fetch logs');
-      setLoading(false);
+    } finally {
+      setLoading(false); // Ensure loading is false when fetch finishes
     }
   };
 
@@ -59,6 +62,8 @@ const Logs = () => {
         return `Assigned employee to team`;
       case 'employee_removed_from_team':
         return 'Removed employee from team';
+      case 'user_logged_out':
+        return 'User logged out';
       default:
         return action;
     }
@@ -82,6 +87,82 @@ const Logs = () => {
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentLogs = logs.slice(indexOfFirstItem, indexOfLastItem);
 
+  // Determine the content to display inside the table body
+  const renderTableBodyContent = () => {
+    if (loading) {
+      return (
+        <tr>
+          <td colSpan="4" className="loading-state">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    if (error) {
+        return (
+            <tr>
+              <td colSpan="4" className="error-state">
+                <div className="empty-state-content">
+                    <div className="empty-state-icon error-icon-wrapper">
+                        <AlertTriangle className="empty-icon" />
+                    </div>
+                    <p className="empty-state-text">{error}</p>
+                    <button onClick={fetchLogs} className="retry-button">Try Again</button>
+                </div>
+              </td>
+            </tr>
+          );
+    }
+
+    if (currentLogs.length === 0) {
+      return (
+        <tr>
+          <td colSpan="4" className="empty-state">
+            <div className="empty-state-content">
+              <div className="empty-state-icon">
+                <FileText className="empty-icon" />
+              </div>
+              <p className="empty-state-text">No activity logs found.</p>
+            </div>
+          </td>
+        </tr>
+      );
+    }
+
+    return currentLogs.map((log) => (
+        <tr key={log.id} className="table-row">
+          <td className="table-cell">
+            <div className="cell-text cell-datetime">
+              {formatDate(log.timestamp)}
+            </div>
+          </td>
+          <td className="table-cell">
+            <div className="user-cell">
+              <div className="user-avatar-small">
+                <User className="user-icon-small" />
+              </div>
+              <span className="cell-text">
+                {log.user ? log.user.name : 'Unknown'}
+              </span>
+            </div>
+          </td>
+          <td className="table-cell">
+            <span className={getActionBadgeClass(log.action)}>
+              {log.action.replace(/_/g, ' ')}
+            </span>
+          </td>
+          <td className="table-cell">
+            <div className="cell-text cell-details">
+              {getActionDescription(log.action, log.meta)}
+            </div>
+          </td>
+        </tr>
+      ));
+  };
+
   return (
     <div className="logs-page">
       <div className="logs-container">
@@ -89,11 +170,7 @@ const Logs = () => {
           <h1 className="logs-title">Log Entries</h1>
         </div>
 
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
+        {/* Error message display moved inside the table body logic */}
 
         <div className="table-container">
           <div className="table-wrapper">
@@ -127,64 +204,14 @@ const Logs = () => {
                 </tr>
               </thead>
               <tbody>
-                {/* --- Conditional Rendering inside the tbody --- */}
-                {loading ? (
-                  <tr>
-                    <td colSpan="4" className="loading-state">
-                      <div className="loading-container">
-                        <div className="loading-spinner"></div>
-                      </div>
-                    </td>
-                  </tr>
-                ) : currentLogs.length === 0 ? (
-                  <tr>
-                    <td colSpan="4" className="empty-state">
-                      <div className="empty-state-content">
-                        <div className="empty-state-icon">
-                          <FileText className="empty-icon" />
-                        </div>
-                        <p className="empty-state-text">No activity logs found.</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  currentLogs.map((log) => (
-                    <tr key={log.id} className="table-row">
-                      <td className="table-cell">
-                        <div className="cell-text cell-datetime">
-                          {formatDate(log.timestamp)}
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <div className="user-cell">
-                          <div className="user-avatar-small">
-                            <User className="user-icon-small" />
-                          </div>
-                          <span className="cell-text">
-                            {log.user ? log.user.name : 'Unknown'}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="table-cell">
-                        <span className={getActionBadgeClass(log.action)}>
-                          {log.action.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-                      <td className="table-cell">
-                        <div className="cell-text cell-details">
-                          {getActionDescription(log.action, log.meta)}
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-                {/* --- End Conditional Rendering --- */}
+                {renderTableBodyContent()}
               </tbody>
             </table>
           </div>
         </div>
 
-        {logs.length > 0 && !loading && (
+        {/* Pagination only shows if there are items and not loading/errored */}
+        {logs.length > 0 && !loading && !error && (
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

@@ -76,11 +76,19 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('activeTab');
-    setUser(null);
+  const logout = async () => {
+    try {
+      const response = await authAPI.logout(); 
+      console.log(response.data.message);
+      console.log("Logged out successfully on backend.");
+    } catch (error) {
+      console.error('Logout API call failed:', error.response?.data?.message || 'Server error');
+    } finally {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('activeTab');
+      setUser(null);
+    }
   };
 
   const value = {
